@@ -3,8 +3,16 @@
 import cv2
 import numpy as np
 import imutils
-import keras
-from keras.models import load_model
+import tensorflow.keras
+from tensorflow.keras.models import load_model
+from gpiozero import Button,LED
+from datetime import datetime
+
+
+red = LED(23)
+green = LED(24)
+sensor = Button(2)
+
 
 def x_cord_contour(contours):
     #Returns the X cordinate for the contour centroid
@@ -92,6 +100,44 @@ def four_point_transform(image, pts):
     return warped
 
 
+def interpret_date(received_date, min_date, max_date):
+    
+    ##convert to integer format
+    received_date = list(map(int,received_date))
+    year = received_date[6:]
+    str_year = [str(year) for year in year]
+    a_year = "".join(str_year)
+    int_year = int(a_year)
+    
+    month =received_date[3:5]
+    str_month = [str(month) for month in month]
+    a_month = "".join(str_month)
+    int_month = int(a_month)
+    
+    day =  received_date[0:2]
+    str_day = [str(day) for day in day]
+    a_day = "".join(str_day)
+    int_day = int(a_day)
+    
+    
+    date = [int_year ,int_month, int_day]
+    dt = datetime(*date)
+    
+    print(dt)
+    print(datetime.now())
+    
+    now = datetime.now()
+    pack = dt
+    delta = pack - now
+    
+    if delta.days < min_date and delta.days > max_date:
+        return(False)
+
+    else:
+        return(True)
+        
+        
+
 image = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\box_ocr\box_3.jpg")
 dim = (800,600)
 image= cv2.resize(image,dim, interpolation = cv2.INTER_AREA)
@@ -165,7 +211,7 @@ cv2.destroyAllWindows()
 #####################################################################
 
 
-classifier = load_model(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\OCR_data\Trained_Models\ocr.h5")
+classifier = load_model(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\OCR_data\Trained_Models\ocr2.h5")
 region = [(396, 300), (640, 290)]
 
 orig_img = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\box_ocr\box_3.jpg")
@@ -199,7 +245,7 @@ for c in contours:
         roi_otsu = pre_process(roi, True)
         cv2.imshow("ROI2", roi_otsu)
         roi_otsu = cv2.cvtColor(roi_otsu, cv2.COLOR_GRAY2RGB)
-        roi_otsu = keras.preprocessing.image.img_to_array(roi_otsu)
+        roi_otsu = tensorflow.keras.preprocessing.image.img_to_array(roi_otsu)
         roi_otsu = roi_otsu * 1./255
         roi_otsu = np.expand_dims(roi_otsu, axis=0)
         image = np.vstack([roi_otsu])
@@ -213,3 +259,6 @@ for c in contours:
         
 cv2.destroyAllWindows()
 print(full_number)
+
+
+
