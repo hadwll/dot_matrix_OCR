@@ -5,13 +5,7 @@ import numpy as np
 import imutils
 import tensorflow.keras
 from tensorflow.keras.models import load_model
-from gpiozero import Button,LED
-from datetime import datetime
 
-
-red = LED(23)
-green = LED(24)
-sensor = Button(2)
 
 
 def x_cord_contour(contours):
@@ -99,46 +93,9 @@ def four_point_transform(image, pts):
     # return the warped image
     return warped
 
-
-def interpret_date(received_date, min_date, max_date):
-    
-    ##convert to integer format
-    received_date = list(map(int,received_date))
-    year = received_date[6:]
-    str_year = [str(year) for year in year]
-    a_year = "".join(str_year)
-    int_year = int(a_year)
-    
-    month =received_date[3:5]
-    str_month = [str(month) for month in month]
-    a_month = "".join(str_month)
-    int_month = int(a_month)
-    
-    day =  received_date[0:2]
-    str_day = [str(day) for day in day]
-    a_day = "".join(str_day)
-    int_day = int(a_day)
-    
-    
-    date = [int_year ,int_month, int_day]
-    dt = datetime(*date)
-    
-    print(dt)
-    print(datetime.now())
-    
-    now = datetime.now()
-    pack = dt
-    delta = pack - now
-    
-    if delta.days < min_date and delta.days > max_date:
-        return(False)
-
-    else:
-        return(True)
-        
         
 
-image = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\box_ocr\box_3.jpg")
+image = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\box_ocr\box_12.jpg")
 dim = (800,600)
 image= cv2.resize(image,dim, interpolation = cv2.INTER_AREA)
 original_image = image
@@ -147,12 +104,14 @@ cv2.waitKey(0)
 
 # convert the image to grayscale, blur it, and find edges
 # in the image
+
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-gray = cv2.GaussianBlur(gray, (5, 5), 0)
-edged = cv2.Canny(gray, 100, 300)
+gray = cv2.GaussianBlur(gray, (3, 3), cv2.BORDER_DEFAULT)
+edged = cv2.Canny(image=gray, threshold1=50,threshold2=170)
 
 #cv2.imshow("Image", image)
-#cv2.imshow("Edged", edged)
+cv2.imshow("Edged", edged)
+
 
 
 # edged is the edge detected image
@@ -178,12 +137,13 @@ cv2.waitKey(0)
 
 ROI = four_point_transform(image, screenCnt.reshape(4, 2))
 cv2.imshow('warped', ROI)
+cv2.imwrite('train_pic2.jpg', ROI)
 cv2.waitKey(0)
 
 
 
 # Extracting the area were the date numbers are located
-roi = ROI[20:55, 280:420]
+roi = ROI[35:75, 80:250]
 
 cv2.imshow('ROi', roi)
 cv2.waitKey(0)
@@ -211,10 +171,10 @@ cv2.destroyAllWindows()
 #####################################################################
 
 
-classifier = load_model(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\OCR_data\Trained_Models\ocr2.h5")
-region = [(396, 300), (640, 290)]
+classifier = load_model(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\OCR_data\Trained_Models\ocr.h5")
+region = [(245, 310), (640, 300)]
 
-orig_img = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\box_ocr\box_3.jpg")
+orig_img = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\box_ocr\box_10.jpg")
 dim = (800 , 600)
 orig_img = cv2.resize(orig_img, dim, interpolation = cv2.INTER_AREA)
 img = inverted
@@ -252,7 +212,7 @@ for c in contours:
         label = str(classifier.predict_classes(image, batch_size = 10))[1]
         full_number.append(label)
         (x, y, w, h) = (x+region[0][0], y+region[0][1], w, h)
-        cv2.rectangle(orig_img, (x, y), (x + w, y + h), (0, 255, 0), 1)
+        cv2.rectangle(orig_img, (x, y), (x + w, y + h), (255, 0, 0), 2)
         cv2.putText(orig_img, label, (x , y + 90), cv2.FONT_HERSHEY_COMPLEX, 1, (255,0, 255), 2)
         cv2.imshow("image", orig_img)
         cv2.waitKey(0) 

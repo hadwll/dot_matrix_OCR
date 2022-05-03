@@ -248,27 +248,22 @@ def x_cord_contour(contours):
 
 ##apply  pre procesing in order to join the dots present in dot matrix print
 
-cc1 = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\box_ocr\train_pic.jpg", 0)
+cc1 = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\train_pic_3.png", 0)
 _, th2 = cv2.threshold(cc1, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 inverted = cv2.bitwise_not(th2)
 
 
-M = cv2.getRotationMatrix2D((10, 10), 358, 1.0)
-rotated = cv2.warpAffine(inverted, M, (890, 175))
-cv2.imshow("Inverted", rotated)
-
-
 ##dilate and erode to remove the dots from the image.
-kernel = np.ones((3,3),np.uint8)
-dilated =cv2.dilate(rotated,kernel,iterations=4)
-cv2.imshow("Dilated", dilated)
+#kernel = np.ones((3,3),np.uint8)
+#dilated =cv2.dilate(inverted,kernel,iterations=4)
+#cv2.imshow("Dilated", dilated)
 
-eroded = cv2.erode(dilated,(5,5),iterations=10)
-cv2.imshow("Eroded", eroded)
+#eroded = cv2.erode(dilated,(5,5),iterations=10)
+cv2.imshow("inverted", inverted)
 
 
 
-cc1= eroded[:,20:852]
+cc1= inverted[:,:]
 cv2.imshow("Digits 2 Thresholded", cc1)
 cv2.waitKey(0)   
 cv2.destroyAllWindows()
@@ -294,7 +289,7 @@ for i in range(0,10):
 
 # This is the coordinates of the region enclosing  the first digit
 # This is preset and was done manually based on this specific image
-region = [(0, 0), (75, 150)]
+region = [(0, 0), (40, 120)]
 
 
 
@@ -310,8 +305,8 @@ cv2.destroyAllWindows()
 for i in range(0,10):   
     # We jump the next digit each time we loop
     if i > 0:
-        top_left_x = top_left_x + 75
-        bottom_right_x = bottom_right_x + 75
+        top_left_x = top_left_x + 43
+        bottom_right_x = bottom_right_x + 43
  
     roi = cc1[top_left_y:bottom_right_y, top_left_x:bottom_right_x]
     print("Augmenting Train Digit - ", str(i))
@@ -328,18 +323,18 @@ for i in range(0,10):
 #### The following block of code creates 200 test images from the train image ####
 
 
-cc1 = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\box_ocr\train_pic.jpg", 0)
+cc1 = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\train_pic_3.png", 0)
 _, th2 = cv2.threshold(cc1, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 inverted = cv2.bitwise_not(th2)
 
 ##dilate and erode to remove the dots from the image.
-kernel = np.ones((4,4),np.uint8)
-dilated =cv2.dilate(inverted,kernel,iterations=3)
-eroded = cv2.erode(dilated,(5,5),iterations=10)
+#kernel = np.ones((4,4),np.uint8)
+#dilated =cv2.dilate(inverted,kernel,iterations=3)
+#eroded = cv2.erode(dilated,(5,5),iterations=10)
 
-cc1= eroded
+cc1= inverted
 
-region = [(0, 0), (76, 120)]
+region = [(0, 0), (40, 120)]
  
 top_left_y = region[0][1]
 bottom_right_y = region[1][1]
@@ -349,8 +344,8 @@ bottom_right_x = region[1][0]
 for i in range(0,10):   
     # We jump the next digit each time we loop
     if i > 0:
-        top_left_x = top_left_x + 75
-        bottom_right_x = bottom_right_x + 75
+        top_left_x = top_left_x + 43
+        bottom_right_x = bottom_right_x + 43
  
     roi = cc1[top_left_y:bottom_right_y, top_left_x:bottom_right_x]
     print("Augmenting Test Digit - ", str(i))
@@ -434,7 +429,7 @@ model.add(Activation("relu"))
 
  
 # Softmax (for classification)
-model.add(Dense(num_classes))
+model.add(Dense(10))
 model.add(Activation("softmax"))
            
 model.compile(loss = 'categorical_crossentropy',

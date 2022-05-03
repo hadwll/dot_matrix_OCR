@@ -103,19 +103,18 @@ def four_point_transform(image, pts):
 
 def interpret_date(received_date, min_date, max_date):
     
-    ##convert to integer format
     received_date = list(map(int,received_date))
-    year = received_date[6:]
+    year = received_date[:4]
     str_year = [str(year) for year in year]
     a_year = "".join(str_year)
     int_year = int(a_year)
     
-    month =received_date[3:5]
+    month =received_date[5:6]
     str_month = [str(month) for month in month]
     a_month = "".join(str_month)
     int_month = int(a_month)
     
-    day =  received_date[0:2]
+    day =  received_date[8:]
     str_day = [str(day) for day in day]
     a_day = "".join(str_day)
     int_day = int(a_day)
@@ -139,7 +138,7 @@ def interpret_date(received_date, min_date, max_date):
         
         
 
-image = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\box_ocr\box_3.jpg")
+image = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\box_ocr\box_12.jpg")
 dim = (800,600)
 image= cv2.resize(image,dim, interpolation = cv2.INTER_AREA)
 original_image = image
@@ -148,9 +147,10 @@ cv2.waitKey(0)
 
 # convert the image to grayscale, blur it, and find edges
 # in the image
+
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-gray = cv2.GaussianBlur(gray, (5, 5), 0)
-edged = cv2.Canny(gray, 100, 300)
+gray = cv2.GaussianBlur(gray, (5, 5), cv2.BORDER_DEFAULT)
+edged = cv2.Canny(image=gray, threshold1=50,threshold2=100)
 
 #cv2.imshow("Image", image)
 #cv2.imshow("Edged", edged)
