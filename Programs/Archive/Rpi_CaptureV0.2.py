@@ -3,8 +3,10 @@
 import cv2
 import numpy as np
 import imutils
-import keras
-from keras.models import load_model
+import tensorflow.keras
+from tensorflow.keras.models import load_model
+
+
 
 def x_cord_contour(contours):
     #Returns the X cordinate for the contour centroid
@@ -91,8 +93,9 @@ def four_point_transform(image, pts):
     # return the warped image
     return warped
 
-
-image = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\box_ocr\box_3.jpg")
+        
+##insert 10 or 12
+image = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\box_ocr\box_12.jpg")
 dim = (800,600)
 image= cv2.resize(image,dim, interpolation = cv2.INTER_AREA)
 original_image = image
@@ -101,12 +104,14 @@ cv2.waitKey(0)
 
 # convert the image to grayscale, blur it, and find edges
 # in the image
+
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-gray = cv2.GaussianBlur(gray, (5, 5), 0)
-edged = cv2.Canny(gray, 100, 300)
+gray = cv2.GaussianBlur(gray, (3, 3), cv2.BORDER_DEFAULT)
+edged = cv2.Canny(image=gray, threshold1=50,threshold2=170)
 
 #cv2.imshow("Image", image)
-#cv2.imshow("Edged", edged)
+cv2.imshow("Edged", edged)
+
 
 
 # edged is the edge detected image
@@ -132,12 +137,13 @@ cv2.waitKey(0)
 
 ROI = four_point_transform(image, screenCnt.reshape(4, 2))
 cv2.imshow('warped', ROI)
+cv2.imwrite('train_pic2.jpg', ROI)
 cv2.waitKey(0)
 
 
 
 # Extracting the area were the date numbers are located
-roi = ROI[20:55, 280:420]
+roi = ROI[35:75, 80:250]
 
 cv2.imshow('ROi', roi)
 cv2.waitKey(0)
@@ -166,12 +172,12 @@ cv2.destroyAllWindows()
 
 
 classifier = load_model(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\OCR_data\Trained_Models\ocr.h5")
-region = [(396, 300), (640, 290)]
+region = [(245, 310), (640, 300)]
 
-orig_img = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\box_ocr\box_3.jpg")
+orig_img = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\box_ocr\box_12.jpg")
 dim = (800 , 600)
 orig_img = cv2.resize(orig_img, dim, interpolation = cv2.INTER_AREA)
-img = eroded
+img = inverted
 #gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY))
 
  
@@ -192,24 +198,27 @@ full_number = []
 for c in contours:
     # compute the bounding box for the rectangle
     (x, y, w, h) = cv2.boundingRect(c)    
-    if w >= 2 and h >= 2:
+    if w >= 5 and h >= 10:
         roi = img[y:y + h, x:x + w]
         #ret, roi = cv2.threshold(roi, 20, 255,cv2.THRESH_BINARY_INV)
         cv2.imshow("ROI1", roi)
         roi_otsu = pre_process(roi, True)
         cv2.imshow("ROI2", roi_otsu)
         roi_otsu = cv2.cvtColor(roi_otsu, cv2.COLOR_GRAY2RGB)
-        roi_otsu = keras.preprocessing.image.img_to_array(roi_otsu)
+        roi_otsu = tensorflow.keras.preprocessing.image.img_to_array(roi_otsu)
         roi_otsu = roi_otsu * 1./255
         roi_otsu = np.expand_dims(roi_otsu, axis=0)
         image = np.vstack([roi_otsu])
         label = str(classifier.predict_classes(image, batch_size = 10))[1]
         full_number.append(label)
         (x, y, w, h) = (x+region[0][0], y+region[0][1], w, h)
-        cv2.rectangle(orig_img, (x, y), (x + w, y + h), (0, 255, 0), 1)
-        cv2.putText(orig_img, label, (x , y + 90), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 255), 2)
+        cv2.rectangle(orig_img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+        cv2.putText(orig_img, label, (x , y + 90), cv2.FONT_HERSHEY_COMPLEX, 1, (255,0, 255), 2)
         cv2.imshow("image", orig_img)
         cv2.waitKey(0) 
         
 cv2.destroyAllWindows()
 print(full_number)
+
+
+

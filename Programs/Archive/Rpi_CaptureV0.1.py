@@ -3,8 +3,8 @@
 import cv2
 import numpy as np
 import imutils
-import tensorflow.keras as keras
-from tensorflow.keras.models import load_model
+import keras
+from keras.models import load_model
 
 def x_cord_contour(contours):
     #Returns the X cordinate for the contour centroid
@@ -171,7 +171,7 @@ region = [(396, 300), (640, 290)]
 orig_img = cv2.imread(r"C:\Users\hadwl\Documents\University\pervasive computing\Images\box_ocr\box_3.jpg")
 dim = (800 , 600)
 orig_img = cv2.resize(orig_img, dim, interpolation = cv2.INTER_AREA)
-img = inverted
+img = eroded
 #gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY))
 
  
@@ -192,7 +192,7 @@ full_number = []
 for c in contours:
     # compute the bounding box for the rectangle
     (x, y, w, h) = cv2.boundingRect(c)    
-    if w >= 5 and h >= 10:
+    if w >= 2 and h >= 2:
         roi = img[y:y + h, x:x + w]
         #ret, roi = cv2.threshold(roi, 20, 255,cv2.THRESH_BINARY_INV)
         cv2.imshow("ROI1", roi)
@@ -207,7 +207,7 @@ for c in contours:
         full_number.append(label)
         (x, y, w, h) = (x+region[0][0], y+region[0][1], w, h)
         cv2.rectangle(orig_img, (x, y), (x + w, y + h), (0, 255, 0), 1)
-        cv2.putText(orig_img, label, (x , y + 90), cv2.FONT_HERSHEY_COMPLEX, 1, (255,0, 255), 2)
+        cv2.putText(orig_img, label, (x , y + 90), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 255), 2)
         cv2.imshow("image", orig_img)
         cv2.waitKey(0) 
         
